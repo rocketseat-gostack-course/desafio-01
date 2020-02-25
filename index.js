@@ -46,4 +46,17 @@ server.delete('/projects/:id', (req, res) => {
   return res.json(projects);
 });
 
+server.post('/projects/:id/tasks', (req, res) => {
+  const { id } = req.params;
+
+  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
+  if (index < 0) {
+    return res.status(400).json({ error: 'Project does not exists.' });
+  }
+
+  const { title } = req.body;
+  projects[index].tasks.push(title);
+  return res.json(projects[index]);
+});
+
 server.listen(3000);
