@@ -8,6 +8,16 @@ server.use(express.json());
 const projects = [];
 let req_count = 0;
 
+function projectExists(req, res, next) {
+  const { id } = req.params;
+  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
+  if (index < 0) {
+    return res.status(400).json({ error: 'Project does not exists.' });
+  }
+  req.projectIndex = index;
+  return next();
+}
+
 server.use((req, res, next) => {
   req_count += 1;
   // eslint-disable-next-line no-console
@@ -29,42 +39,21 @@ server.post('/projects', (req, res) => {
   return res.json(projects);
 });
 
-server.put('/projects/:id', (req, res) => {
-  const { id } = req.params;
-
-  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
-  if (index < 0) {
-    return res.status(400).json({ error: 'Project does not exists.' });
-  }
-
+server.put('/projects/:id', projectExists, (req, res) => {
   const { title } = req.body;
-  projects[index].title = title;
-  return res.json(projects[index]);
+  projects[req.projectIndex].title = title;
+  return res.json(projects[req.projectIndex]);
 });
 
-server.delete('/projects/:id', (req, res) => {
-  const { id } = req.params;
-
-  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
-  if (index < 0) {
-    return res.status(400).json({ error: 'Project does not exists.' });
-  }
-
-  projects.splice(index, 1);
+server.delete('/projects/:id', projectExists, (req, res) => {
+  projects.splice(req.projectIndex, 1);
   return res.json(projects);
 });
 
-server.post('/projects/:id/tasks', (req, res) => {
-  const { id } = req.params;
-
-  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
-  if (index < 0) {
-    return res.status(400).json({ error: 'Project does not exists.' });
-  }
-
+server.post('/projects/:id/tasks', projectExists, (req, res) => {
   const { title } = req.body;
-  projects[index].tasks.push(title);
-  return res.json(projects[index]);
+  projects[req.projectIndex].tasks.push(title);
+  return res.json(projects[req.projectIndex]);
 });
 
 server.listen(3000);
