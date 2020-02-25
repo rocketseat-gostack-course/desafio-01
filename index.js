@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 const express = require('express');
 
 const server = express();
@@ -18,6 +19,19 @@ server.post('/projects', (req, res) => {
   }
   projects.push({ id, title, tasks: [] });
   return res.json(projects);
+});
+
+server.put('/projects/:id', (req, res) => {
+  const { id } = req.params;
+
+  const index = projects.findIndex(item => parseInt(item.id) === parseInt(id));
+  if (index < 0) {
+    return res.status(400).json({ error: 'Project does not exists.' });
+  }
+
+  const { title } = req.body;
+  projects[index].title = title;
+  return res.json(projects[index]);
 });
 
 server.listen(3000);
