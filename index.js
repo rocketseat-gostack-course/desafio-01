@@ -6,6 +6,14 @@ const server = express();
 server.use(express.json());
 
 const projects = [];
+let req_count = 0;
+
+server.use((req, res, next) => {
+  req_count += 1;
+  // eslint-disable-next-line no-console
+  console.log(`Request count: ${req_count.toString()}`);
+  next();
+});
 
 server.get('/projects', (req, res) => {
   return res.json(projects);
